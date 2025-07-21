@@ -199,17 +199,18 @@ func (l Locale) Index() int {
 }
 
 // Tr translate content to target language.
+// if format not i18n key will return format self
 func Tr(lang, format string, args ...interface{}) string {
-	var section string
+	var section, key string
 	parts := strings.SplitN(format, ".", 2)
 	if len(parts) == 2 {
 		section = parts[0]
-		format = parts[1]
+		key = parts[1]
 	}
 
-	value, ok := locales.Get(lang, section, format)
-	if ok {
-		format = value
+	value, ok := locales.Get(lang, section, key)
+	if !ok {
+		value = format // fallback to original
 	}
 
 	if len(args) > 0 {
@@ -226,7 +227,7 @@ func Tr(lang, format string, args ...interface{}) string {
 				}
 			}
 		}
-		return fmt.Sprintf(format, params...)
+		return fmt.Sprintf(value, params...)
 	}
-	return fmt.Sprintf(format)
+	return fmt.Sprintf(value)
 }
